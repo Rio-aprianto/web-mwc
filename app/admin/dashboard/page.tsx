@@ -86,6 +86,9 @@ export default async function AdminDashboardPage() {
     prisma.kader.groupBy({
       by: ["anggota"],
       _count: { _all: true },
+      orderBy: {
+        anggota: "asc",
+      },
     }),
     prisma.ranting.findMany({
       orderBy: [{ namaRanting: "asc" }],
@@ -94,20 +97,32 @@ export default async function AdminDashboardPage() {
         namaRanting: true,
       },
     }),
+    // PERBAIKAN: Ditambahkan orderBy untuk groupBy ranting
     prisma.kader.groupBy({
       by: ["ranting"],
       _count: { _all: true },
+      orderBy: {
+        ranting: "asc",
+      },
     }),
+    // PERBAIKAN: Ditambahkan orderBy untuk groupBy status
     prisma.kader.groupBy({
       by: ["status"],
       _count: { _all: true },
+      orderBy: {
+        status: "asc",
+      },
     }),
+    // PERBAIKAN: Ditambahkan orderBy untuk groupBy jenisKelamin
     prisma.kader.groupBy({
       by: ["jenisKelamin"],
       _count: { _all: true },
+      orderBy: {
+        jenisKelamin: "asc",
+      },
     }),
-    // === DISESUAIKAN: Mengambil total jumlah koin bulan ini berdasarkan createdAt ===
-    prisma.KoinNu.aggregate({
+    // PERBAIKAN: Mengubah prisma.KoinNu menjadi prisma.koinNu (k kecil) sesuai standar Prisma Client
+    prisma.koinNu.aggregate({
       _sum: {
         jumlahKoinBulanIni: true,
       },
@@ -118,8 +133,8 @@ export default async function AdminDashboardPage() {
         },
       },
     }),
-    // Menghitung total seluruh isi baris di tabel KoinNu
-    prisma.KoinNu.count(),
+    // PERBAIKAN: Mengubah prisma.KoinNu menjadi prisma.koinNu (k kecil)
+    prisma.koinNu.count(),
   ]);
 
   let landingViewCount = 0;
