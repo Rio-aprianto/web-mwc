@@ -186,10 +186,7 @@ export default async function AdminDashboardPage() {
   ];
 
   const banomMemberCountMap = new Map(
-    banomKaderRaw.map((item: { anggota: string; _count: { _all: number } }) => [
-      item.anggota,
-      item._count._all,
-    ]),
+    banomKaderRaw.map((item: any) => [item.anggota, item._count?._all ?? 0]),
   );
 
   const banomData: BanomDashboardItem[] = banomRaw.map(
