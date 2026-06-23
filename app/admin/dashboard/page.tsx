@@ -152,11 +152,17 @@ export default async function AdminDashboardPage() {
     minimumFractionDigits: 0,
   }).format(totalNominalKoin);
 
+  // PERBAIKAN: Melakukan pencegahan 'Object is possibly undefined' dengan ekstraksi yang aman sebelum pembuatan array summaryCards
+  const kaderAktifObj = kaderStatusRaw.find(
+    (item: KaderStatusCount) => item.status === "Aktif",
+  );
+  const jumlahKaderAktif = kaderAktifObj?._count?._all ?? 0;
+
   const summaryCards = [
     {
       title: "Jumlah Kader",
       value: String(kaderCount),
-      note: `${kaderStatusRaw.find((item: KaderStatusCount) => item.status === "Aktif")?._count._all ?? 0} kader aktif`,
+      note: `${jumlahKaderAktif} kader aktif`,
       tone: "text-emerald-500",
     },
     {
