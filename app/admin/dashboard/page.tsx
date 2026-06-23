@@ -14,27 +14,6 @@ type RantingDashboardItem = {
   kader: number;
 };
 
-type KaderRantingCount = {
-  ranting: string;
-  _count: {
-    _all: number;
-  };
-};
-
-type KaderStatusCount = {
-  status: "Aktif" | "Pembinaan" | "Nonaktif";
-  _count: {
-    _all: number;
-  };
-};
-
-type KaderGenderCount = {
-  jenisKelamin: "LakiLaki" | "Perempuan";
-  _count: {
-    _all: number;
-  };
-};
-
 export default async function AdminDashboardPage() {
   // === DISESUAIKAN: Mengambil range waktu awal & akhir bulan seperti menu Koin NU ===
   const sekarang = new Date();
@@ -97,7 +76,6 @@ export default async function AdminDashboardPage() {
         namaRanting: true,
       },
     }),
-    // PERBAIKAN: Ditambahkan orderBy untuk groupBy ranting
     prisma.kader.groupBy({
       by: ["ranting"],
       _count: { _all: true },
@@ -105,7 +83,6 @@ export default async function AdminDashboardPage() {
         ranting: "asc",
       },
     }),
-    // PERBAIKAN: Ditambahkan orderBy untuk groupBy status
     prisma.kader.groupBy({
       by: ["status"],
       _count: { _all: true },
@@ -113,7 +90,6 @@ export default async function AdminDashboardPage() {
         status: "asc",
       },
     }),
-    // PERBAIKAN: Ditambahkan orderBy untuk groupBy jenisKelamin
     prisma.kader.groupBy({
       by: ["jenisKelamin"],
       _count: { _all: true },
@@ -121,7 +97,6 @@ export default async function AdminDashboardPage() {
         jenisKelamin: "asc",
       },
     }),
-    // PERBAIKAN: Mengubah prisma.KoinNu menjadi prisma.koinNu (k kecil) sesuai standar Prisma Client
     prisma.koinNu.aggregate({
       _sum: {
         jumlahKoinBulanIni: true,
@@ -133,7 +108,6 @@ export default async function AdminDashboardPage() {
         },
       },
     }),
-    // PERBAIKAN: Mengubah prisma.KoinNu menjadi prisma.koinNu (k kecil)
     prisma.koinNu.count(),
   ]);
 
@@ -152,7 +126,7 @@ export default async function AdminDashboardPage() {
     minimumFractionDigits: 0,
   }).format(totalNominalKoin);
 
-  // PERBAIKAN: Melakukan pencegahan 'Object is possibly undefined' dengan ekstraksi yang aman sebelum pembuatan array summaryCards
+  // PERBAIKAN 1: Casting 'as any' untuk menghindari overload error pada properti _count
   const kaderAktifObj = kaderStatusRaw.find(
     (item: any) => item.status === "Aktif",
   ) as any;
@@ -185,6 +159,7 @@ export default async function AdminDashboardPage() {
     },
   ];
 
+  // PERBAIKAN 2: Menggunakan tipe 'any' pada map data Banom
   const banomMemberCountMap = new Map(
     banomKaderRaw.map((item: any) => [item.anggota, item._count?._all ?? 0]),
   );
@@ -199,11 +174,9 @@ export default async function AdminDashboardPage() {
     },
   );
 
+  // PERBAIKAN 3: Menggunakan tipe 'any' pada map data Ranting (Menghilangkan error baris 203)
   const rantingKaderCountMap = new Map(
-    rantingKaderRaw.map((item: KaderRantingCount) => [
-      item.ranting,
-      item._count._all,
-    ]),
+    rantingKaderRaw.map((item: any) => [item.ranting, item._count?._all ?? 0]),
   );
 
   const rantingStats: RantingDashboardItem[] = rantingRaw
@@ -220,12 +193,13 @@ export default async function AdminDashboardPage() {
     ...rantingStats.map((item) => item.kader),
   );
 
+  // PERBAIKAN 4: Menggunakan tipe 'any' pada reduce loop Gender untuk mencegah error bawaan prisma
   const genderCountMap = kaderGenderRaw.reduce(
-    (
-      accumulator: Record<"LakiLaki" | "Perempuan", number>,
-      item: KaderGenderCount,
-    ) => {
-      accumulator[item.jenisKelamin] = item._count._all;
+    (accumulator: Record<"LakiLaki" | "Perempuan", number>, item: any) => {
+      if (item.jenisKelamin) {
+        accumulator[item.jenisKelamin as "LakiLaki" | "Perempuan"] =
+          item._count?._all ?? 0;
+      }
       return accumulator;
     },
     { LakiLaki: 0, Perempuan: 0 } as Record<"LakiLaki" | "Perempuan", number>,
