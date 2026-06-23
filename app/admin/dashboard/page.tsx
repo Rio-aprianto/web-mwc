@@ -155,7 +155,7 @@ export default async function AdminDashboardPage() {
   // PERBAIKAN: Melakukan pencegahan 'Object is possibly undefined' dengan ekstraksi yang aman sebelum pembuatan array summaryCards
   const kaderAktifObj = kaderStatusRaw.find(
     (item: any) => item.status === "Aktif",
-  );
+  ) as any;
   const jumlahKaderAktif = kaderAktifObj?._count?._all ?? 0;
 
   const summaryCards = [
