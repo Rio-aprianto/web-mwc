@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Healthcheck {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+}
+
+enum ActiveStatus {
+  Aktif
+  Nonaktif
+}
+
+enum TriStatus {
+  Aktif
+  Pembinaan
+  Nonaktif
+}
+
+enum JenisKelamin {
+  LakiLaki
+  Perempuan
+}
+
+enum PenggunaRole {
+  SuperAdmin
+  EditorKonten
+  OperatorData
+  Kontributor
+}
+
+model Ranting {
+  id         Int       @id @default(autoincrement())
+  namaRanting String   @unique
+  status     TriStatus @default(Aktif)
+  jumlahKader Int
+  koinNu     KoinNu[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Banom {
+  id            Int          @id @default(autoincrement())
+  namaBanom     String       @unique
+  jumlahAnggota Int          @default(0)
+  status        ActiveStatus @default(Aktif)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Kader {
+  id        Int       @id @default(autoincrement())
+  nama      String
+  ranting   String
+  anggota   String
+  jenisKelamin JenisKelamin @default(LakiLaki)
+  status    TriStatus @default(Aktif)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Pengguna {
+  id           Int          @id @default(autoincrement())
+  nama         String
+  role         PenggunaRole @default(Kontributor)
+  email        String       @unique
+  passwordHash String
+  status       ActiveStatus @default(Aktif)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Pengurus {
+  id        Int          @id @default(autoincrement())
+  nama      String
+  jabatan   String
+  bidang    String
+  periode   String
+  nomorWa   String?
+  status    ActiveStatus @default(Aktif)
+  fotoUrl   String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model KoinNu {
+  id                   Int      @id @default(autoincrement())
+  rantingId            Int
+  bulan                Int
+  tahun                Int
+  penanggungJawab      String
+  jumlahKoinBulanIni   Int
+  jumlahKoinKeseluruhan Int
+  ranting              Ranting  @relation(fields: [rantingId], references: [id], onDelete: Restrict)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([bulan, tahun])
+}
+
+model Berita {
+  id           Int      @id @default(autoincrement())
+  imageUrl     String
+  judul        String
+  konten       String
+  tanggalUpload DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model BannerImage {
+  id         Int      @id @default(autoincrement())
+  imageUrl   String
+  keterangan String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model SambutanKetua {
+  id        Int      @id @default(autoincrement())
+  title     String
+  namaKetua String
+  isi       String
+  imageUrl  String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model SambutanTanfidziyah {
+  id        String   @id @default(cuid())
+  title     String   @default("Sambutan Ketua Cabang")
+  namaKetua String   @default("Drs. Ahmad Mulyana")
+  isi       String   @default("Assalamu'alaikum warahmatullahi wabarakatuh...")
+  imageUrl  String   @default("/images/ketua_mwc1.png")
+  updatedAt DateTime @updatedAt
+
+  @@map("sambutan_tanfidziyah")
+}
