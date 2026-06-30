@@ -30,7 +30,7 @@ const mainMenu: MenuItem[] = [
 ];
 
 const dataMenu: MenuItem[] = [
-  { name: "Data Ranting", href: "/admin/data/ranting" },
+  { name: "Data Ranting/Lembaga", href: "/admin/data/ranting" },
   { name: "Data Kader", href: "/admin/data/kader" },
   { name: "Data Banom", href: "/admin/data/banom" },
   { name: "Data Pengguna", href: "/admin/data/pengguna" },

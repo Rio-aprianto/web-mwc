@@ -50,7 +50,15 @@ export default function Footer() {
           </p>
           <p className='text-xs opacity-80'>
             Supported by{" "}
-            <span className='font-semibold text-emerald-200'>rio aprianto</span>
+            <span className='font-semibold text-emerald-200'>
+              <a
+                href='https://portfolio-rioaprianto-my-id.vercel.app/'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-emerald-200 hover:underline'>
+                Rio Aprianto
+              </a>
+            </span>
           </p>
         </div>
       </div>
