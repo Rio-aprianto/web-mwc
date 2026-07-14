@@ -94,12 +94,6 @@ export default function AdminBeritaPage() {
     startIndex + pageSize,
   );
 
-  useEffect(() => {
-    if (totalPages > 0 && currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
-
   function resetForm() {
     setEditingId(null);
     setForm({

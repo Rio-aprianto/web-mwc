@@ -15,7 +15,7 @@ export default async function Sambutan() {
   const namaKetua = sambutan?.namaKetua || "SUTARNO, S.H";
   const isi = sambutan?.isi || "Assalamu'alaikum warahmatullahi wabarakatuh...";
 
-  let imageUrl = sambutan?.imageUrl || "/images/IMG_5436-removebg-preview.png";
+  const imageUrl = sambutan?.imageUrl || "/images/IMG_5436-removebg-preview.png";
 
   console.log(
     "🔍 [Rois Syuriah] Image URL from DB:",

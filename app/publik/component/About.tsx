@@ -14,7 +14,7 @@ export default async function SambutanTanfidziyah() {
 
   const namaKetua = sambutan?.namaKetua || "KH. Ahmad Fauzi, M.Ag";
   const isi = sambutan?.isi || "Assalamu’alaikum Warahmatullahi Wabarakatuh...";
-  let imageUrl = sambutan?.imageUrl || "/images/IMG_5436-removebg-preview.png";
+  const imageUrl = sambutan?.imageUrl || "/images/IMG_5436-removebg-preview.png";
 
   console.log("🔍 Image URL from DB:", imageUrl?.substring(0, 150) + "...");
 

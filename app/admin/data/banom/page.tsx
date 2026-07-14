@@ -71,7 +71,9 @@ export default function AdminDataBanomPage() {
   }
 
   useEffect(() => {
-    void loadAllData();
+    void (async () => {
+      await loadAllData();
+    })();
   }, []);
 
   const ketuaMap = useMemo(() => {

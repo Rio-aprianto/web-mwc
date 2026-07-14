@@ -126,11 +126,12 @@ export default async function AdminDashboardPage() {
     minimumFractionDigits: 0,
   }).format(totalNominalKoin);
 
-  // PERBAIKAN 1: Casting 'as any' untuk menghindari overload error pada properti _count
+  // Menghindari overload error pada properti _count dengan tipe eksplisit
   const kaderAktifObj = kaderStatusRaw.find(
-    (item: any) => item.status === "Aktif",
-  ) as any;
-  const jumlahKaderAktif = kaderAktifObj?._count?._all ?? 0;
+    (item: { status: string; _count: { _all: number } }) =>
+      item.status === "Aktif",
+  );
+  const jumlahKaderAktif = kaderAktifObj?._count._all ?? 0;
 
   const summaryCards = [
     {
@@ -159,9 +160,14 @@ export default async function AdminDashboardPage() {
     },
   ];
 
-  // PERBAIKAN 2: Menggunakan tipe 'any' pada map data Banom
+  // Menggunakan tipe eksplisit pada map data Banom
   const banomMemberCountMap = new Map(
-    banomKaderRaw.map((item: any) => [item.anggota, item._count?._all ?? 0]),
+    banomKaderRaw.map(
+      (item: { anggota: string; _count: { _all: number } }) => [
+        item.anggota,
+        item._count._all,
+      ],
+    ),
   );
 
   const banomData: BanomDashboardItem[] = banomRaw.map(
@@ -174,9 +180,14 @@ export default async function AdminDashboardPage() {
     },
   );
 
-  // PERBAIKAN 3: Menggunakan tipe 'any' pada map data Ranting (Menghilangkan error baris 203)
+  // Menggunakan tipe eksplisit pada map data Ranting
   const rantingKaderCountMap = new Map(
-    rantingKaderRaw.map((item: any) => [item.ranting, item._count?._all ?? 0]),
+    rantingKaderRaw.map(
+      (item: { ranting: string; _count: { _all: number } }) => [
+        item.ranting,
+        item._count._all,
+      ],
+    ),
   );
 
   const rantingStats: RantingDashboardItem[] = rantingRaw
@@ -193,12 +204,15 @@ export default async function AdminDashboardPage() {
     ...rantingStats.map((item) => item.kader),
   );
 
-  // PERBAIKAN 4: Menggunakan tipe 'any' pada reduce loop Gender untuk mencegah error bawaan prisma
+  // Menggunakan tipe eksplisit pada reduce loop Gender
   const genderCountMap = kaderGenderRaw.reduce(
-    (accumulator: Record<"LakiLaki" | "Perempuan", number>, item: any) => {
+    (
+      accumulator: Record<"LakiLaki" | "Perempuan", number>,
+      item: { jenisKelamin: string; _count: { _all: number } },
+    ) => {
       if (item.jenisKelamin) {
         accumulator[item.jenisKelamin as "LakiLaki" | "Perempuan"] =
-          item._count?._all ?? 0;
+          item._count._all;
       }
       return accumulator;
     },

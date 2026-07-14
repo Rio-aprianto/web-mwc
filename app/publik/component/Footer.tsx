@@ -6,7 +6,7 @@ export default function Footer() {
         <div>
           <h3 className='text-2xl font-bold'>MWC NU Karanganyar</h3>
           <p className='mt-4 text-emerald-100/70'>
-            Melayani umat dan menguatkan jam'iyyah Nahdlatul Ulama.
+            Melayani umat dan menguatkan jam&apos;iyyah Nahdlatul Ulama.
           </p>
         </div>
 

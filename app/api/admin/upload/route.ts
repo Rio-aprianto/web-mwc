@@ -1,9 +1,20 @@
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
+import sharp from "sharp";
 
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 const DEFAULT_BUCKET = "assets-mwckra";
+
+const RASTER_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+]);
+
+const MAX_WIDTH = 1600;
+const WEBP_QUALITY = 82;
 
 export async function POST(request: Request) {
   try {
@@ -20,9 +31,37 @@ export async function POST(request: Request) {
     }
 
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${folder}/${Date.now()}-${randomUUID()}.${ext}`;
     const bytes = await file.arrayBuffer();
 
+    let buffer = Buffer.from(bytes);
+    let contentType = file.type;
+    let finalExt = ext;
+
+    // Kompres semua gambar raster (post/banner/foto) agar tidak terlalu lambat dimuat.
+    if (RASTER_MIME_TYPES.has(file.type)) {
+      try {
+        const image = sharp(buffer, { animated: false });
+        const meta = await image.metadata();
+        const resize =
+          meta.width && meta.width > MAX_WIDTH ? { width: MAX_WIDTH } : undefined;
+
+        const compressed = await image
+          .rotate()
+          .resize(resize)
+          .webp({ quality: WEBP_QUALITY, effort: 5 })
+          .toBuffer();
+
+        if (compressed.length > 0) {
+          buffer = Buffer.from(compressed);
+          contentType = "image/webp";
+          finalExt = "webp";
+        }
+      } catch {
+        // Bila kompresi gagal, unggah file asli apa adanya.
+      }
+    }
+
+    const path = `${folder}/${Date.now()}-${randomUUID()}.${finalExt}`;
     const supabase = getSupabaseAdminClient();
     const { data: bucket } = await supabase.storage.getBucket(DEFAULT_BUCKET);
 
@@ -45,8 +84,8 @@ export async function POST(request: Request) {
 
     const { error: uploadError } = await supabase.storage
       .from(DEFAULT_BUCKET)
-      .upload(path, bytes, {
-        contentType: file.type,
+      .upload(path, buffer, {
+        contentType,
         upsert: false,
       });
 

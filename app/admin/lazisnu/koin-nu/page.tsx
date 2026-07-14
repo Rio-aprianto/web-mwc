@@ -129,7 +129,9 @@ export default function AdminKoinNuPage() {
   }
 
   useEffect(() => {
-    void loadData();
+    void (async () => {
+      await loadData();
+    })();
   }, []);
 
   const selectedPeriodData = useMemo(() => {

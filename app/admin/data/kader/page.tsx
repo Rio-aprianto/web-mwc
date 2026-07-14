@@ -325,12 +325,6 @@ export default function AdminDataKaderPage() {
     return Array.from({ length: 5 }, (_, index) => startPage + index);
   })();
 
-  useEffect(() => {
-    if (totalPages > 0 && currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
-
   return (
     <>
       <article className='rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm shadow-emerald-900/5'>
