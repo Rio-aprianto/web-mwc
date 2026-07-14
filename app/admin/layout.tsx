@@ -1,13 +1,28 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 import { clearAdminUser } from "@/lib/admin-session";
 import AdminSidebar from "./_components/AdminSidebar";
 
+function useIsLg() {
+  const [isLg, setIsLg] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsLg(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return isLg;
+}
+
 export default function AdminLayout({ children }: { children: ReactNode }) {
+  const isLg = useIsLg();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const router = useRouter();
 
@@ -25,15 +40,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <main className='min-h-screen bg-emerald-50 text-slate-900'>
-      <div
-        style={
-          {
-            "--admin-sidebar-width": isSidebarCollapsed ? "88px" : "280px",
-          } as CSSProperties
-        }
-        className='grid min-h-screen grid-cols-1 lg:grid-cols-[var(--admin-sidebar-width)_1fr]'>
+        <div
+          style={
+            {
+              "--admin-sidebar-width": isSidebarCollapsed ? "88px" : "280px",
+            } as CSSProperties
+          }
+          className='grid min-h-screen grid-cols-[88px_1fr] lg:grid-cols-[var(--admin-sidebar-width)_1fr]'>
         <AdminSidebar
-          collapsed={isSidebarCollapsed}
+          collapsed={isLg ? isSidebarCollapsed : true}
           onToggle={() => setIsSidebarCollapsed((prev) => !prev)}
         />
 

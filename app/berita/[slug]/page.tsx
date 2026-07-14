@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { toBeritaSlug } from "@/lib/slug";
 
 type BeritaDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -21,13 +20,17 @@ export default async function BeritaDetailPage({
   params,
 }: BeritaDetailPageProps) {
   const { slug } = await params;
-  const beritaItems = await prisma.berita.findMany({
-    orderBy: { tanggalUpload: "desc" },
-  });
 
-  const berita = beritaItems.find(
-    (item) => toBeritaSlug(item.judul, item.id) === slug,
+  // Slug berbentuk `${slugify(judul)}-${id}`; ambil id dari segmen terakhir
+  // agar tidak perlu memuat seluruh berita hanya untuk mencocokkan satu item.
+  const lastDash = slug.lastIndexOf("-");
+  const idFromSlug = Number(
+    lastDash >= 0 ? slug.slice(lastDash + 1) : slug,
   );
+  const berita =
+    Number.isInteger(idFromSlug) && idFromSlug > 0
+      ? await prisma.berita.findUnique({ where: { id: idFromSlug } })
+      : null;
 
   if (!berita) {
     notFound();

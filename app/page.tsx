@@ -28,7 +28,7 @@ async function HeroSection() {
 
   const slides = banners.map((item) => item.imageUrl);
 
-  return <Hero slides={slides} />;
+  return <Hero heroSlides={slides} />;
 }
 
 async function StatsSection() {

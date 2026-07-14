@@ -141,6 +141,25 @@ export default function AdminKoinNuPage() {
     );
   }, [koinData, selectedPeriod]);
 
+  // Periode yang hanya memiliki data (terbaru diurutkan ke atas)
+  const dataPeriods = useMemo(() => {
+    const periodSet = new Set<string>();
+    koinData.forEach((item) =>
+      periodSet.add(toPeriodValue(item.tahun, item.bulan)),
+    );
+    return Array.from(periodSet).sort((a, b) => (a < b ? 1 : -1));
+  }, [koinData]);
+
+  // Sinkronkan periode terpilih ke periode terbaru yang ada datanya
+  useEffect(() => {
+    if (dataPeriods.length === 0) return;
+    if (!dataPeriods.includes(selectedPeriod)) {
+      const latest = dataPeriods[0];
+      setSelectedPeriod(latest);
+      setReportPeriod(latest);
+    }
+  }, [dataPeriods, selectedPeriod]);
+
   const totalKeseluruhan = useMemo(
     () =>
       koinData.reduce((sum, item) => sum + (item.jumlahKoinBulanIni || 0), 0),
@@ -254,7 +273,7 @@ export default function AdminKoinNuPage() {
         throw new Error(await readErrorMessage(res, "Gagal menghapus"));
       await loadData();
       await notifyDeleted("data Koin NU");
-    } catch (error) {
+    } catch {
       await notifyError("Gagal menghapus data");
     }
   }
@@ -357,20 +376,23 @@ export default function AdminKoinNuPage() {
           </div>
 
           <div className='flex flex-wrap gap-2'>
-            <select
-              value={selectedPeriod}
-              onChange={(e) => handlePeriodChange(e.target.value)}
-              className='rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm'>
-              {Array.from({ length: 12 }, (_, i) => {
-                const m = ((currentMonth + i - 1) % 12) + 1;
-                const y = currentYear + Math.floor((currentMonth + i - 1) / 12);
-                return (
-                  <option key={`${y}-${m}`} value={toPeriodValue(y, m)}>
-                    {monthName(m)} {y}
-                  </option>
-                );
-              })}
-            </select>
+              <select
+                value={selectedPeriod}
+                onChange={(e) => handlePeriodChange(e.target.value)}
+                className='rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm'>
+                {dataPeriods.length === 0 ? (
+                  <option value=''>Tidak ada data</option>
+                ) : (
+                  dataPeriods.map((period) => {
+                    const { year, month } = parsePeriod(period);
+                    return (
+                      <option key={period} value={period}>
+                        {monthName(month)} {year}
+                      </option>
+                    );
+                  })
+                )}
+              </select>
 
             <button
               onClick={() => setIsReportOpen(true)}
@@ -486,17 +508,18 @@ export default function AdminKoinNuPage() {
                 value={reportPeriod}
                 onChange={(e) => setReportPeriod(e.target.value)}
                 className='w-full border border-emerald-200 rounded-lg px-4 py-3 text-sm'>
-                {Array.from({ length: 12 }, (_, i) => {
-                  const m = ((currentMonth + i - 1) % 12) + 1;
-                  const y =
-                    currentYear + Math.floor((currentMonth + i - 1) / 12);
-                  const period = toPeriodValue(y, m);
-                  return (
-                    <option key={period} value={period}>
-                      {monthName(m)} {y}
-                    </option>
-                  );
-                })}
+                {dataPeriods.length === 0 ? (
+                  <option value=''>Tidak ada data</option>
+                ) : (
+                  dataPeriods.map((period) => {
+                    const { year, month } = parsePeriod(period);
+                    return (
+                      <option key={period} value={period}>
+                        {monthName(month)} {year}
+                      </option>
+                    );
+                  })
+                )}
               </select>
 
               <div className='flex justify-end gap-3 mt-6'>

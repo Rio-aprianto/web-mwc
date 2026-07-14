@@ -88,6 +88,7 @@ export default function TopNav() {
             width={250}
             height={250}
             className='h-full w-auto object-contain'
+            loading='eager'
           />
         </a>
 

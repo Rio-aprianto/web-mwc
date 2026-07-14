@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 
+import { deleteExpiredBerita } from "@/lib/cleanupBerita";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
+  await deleteExpiredBerita();
+
   const items = await prisma.berita.findMany({
     orderBy: [{ tanggalUpload: "desc" }, { id: "desc" }],
   });

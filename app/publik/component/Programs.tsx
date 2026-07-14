@@ -1,11 +1,29 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 
 type ProgramDonasi = {
   title: string;
   description: string;
+};
+
+type MemberInput = {
+  id: number;
+  nama: string;
+  jabatan: string;
+  bidang: string | null;
+  fotoUrl: string;
+  nomorWa: string | null;
+};
+
+type ManagementMember = {
+  id: number;
+  name: string;
+  position: string;
+  bidang: string;
+  image: string;
+  waLink: string | null;
 };
 
 const lazisnuPrograms: ProgramDonasi[] = [
@@ -37,10 +55,21 @@ function toWhatsAppLink(phone: string | null) {
 export default function Programs({
   initialMembers = [],
 }: {
-  initialMembers?: any[];
+  initialMembers?: MemberInput[];
 }) {
-  const [management, setManagement] = useState<any[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const management = useMemo<ManagementMember[]>(
+    () =>
+      (initialMembers ?? []).map((member) => ({
+        id: member.id,
+        name: member.nama,
+        position: member.jabatan,
+        bidang: member.bidang || "MWC NU",
+        image: member.fotoUrl || "/images/ketua_mwc.png",
+        waLink: toWhatsAppLink(member.nomorWa),
+      })),
+    [initialMembers],
+  );
+  const [currentIndex, setCurrentIndex] = useState(() => management.length);
   const [translate, setTranslate] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -66,37 +95,25 @@ export default function Programs({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    if (initialMembers.length > 0) {
-      const mapped = initialMembers.map((member) => ({
-        id: member.id,
-        name: member.nama,
-        position: member.jabatan,
-        bidang: member.bidang || "MWC NU",
-        image: member.fotoUrl || "/images/ketua_mwc.png",
-        waLink: toWhatsAppLink(member.nomorWa),
-      }));
-      setManagement(mapped);
-      setCurrentIndex(mapped.length); // Mulai dari tengah
-    }
-  }, [initialMembers]);
+  const shiftIndex = useCallback((delta: number) => {
+    setCurrentIndex((prev) => {
+      const total = management.length;
+      if (total === 0) return prev;
+      let next = prev + delta;
+      if (next >= total * 2) next -= total;
+      else if (next < total) next += total;
+      return next;
+    });
+  }, [management.length]);
 
   // Auto Play
   useEffect(() => {
     if (management.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => prev + 1);
+      shiftIndex(1);
     }, 3200);
     return () => clearInterval(interval);
-  }, [management.length]);
-
-  // Infinite Loop
-  useEffect(() => {
-    const total = management.length;
-    if (total === 0) return;
-    if (currentIndex >= total * 2) setCurrentIndex(total);
-    if (currentIndex < total) setCurrentIndex(total);
-  }, [currentIndex, management.length]);
+  }, [management.length, shiftIndex]);
 
   const cardWidth = 100 / visibleCards;
   const finalTranslate = -(currentIndex * cardWidth) + translate;
@@ -123,20 +140,20 @@ export default function Programs({
 
     const threshold = 60; // px
     if (translate > threshold) {
-      setCurrentIndex((prev) => prev - 1);
+      shiftIndex(-1);
     } else if (translate < -threshold) {
-      setCurrentIndex((prev) => prev + 1);
+      shiftIndex(1);
     }
     setTranslate(0);
-  }, [translate]);
+  }, [translate, shiftIndex]);
 
   return (
     <>
       <section
-        className='relative overflow-hidden bg-cover bg-center bg-fixed py-20 text-white'
+        className='relative overflow-hidden bg-cover bg-center py-20 text-white'
         style={{
           backgroundImage:
-            "linear-gradient(135deg, rgba(3, 37, 24, 0.92), rgba(5, 60, 40, 0.82)), url('/images/banner.jpg')",
+            "linear-gradient(135deg, rgba(3, 37, 24, 0.92), rgba(5, 60, 40, 0.82))",
         }}>
         <div className='mx-auto w-full overflow-hidden'>
           <h2 className='mb-4 text-center text-3xl font-bold tracking-tight text-emerald-50 md:text-4xl'>
@@ -171,8 +188,8 @@ export default function Programs({
                         <div
                           className={`w-full overflow-hidden rounded-3xl border border-white/10 bg-white/10 p-6 text-center shadow-xl backdrop-blur-sm h-full flex flex-col justify-between transition-all duration-700 ${
                             isCenter
-                              ? "scale-110 bg-white/20 shadow-2xl z-20"
-                              : "scale-95 opacity-75 hover:opacity-90"
+                              ? "sm:scale-110 bg-white/20 shadow-2xl z-20"
+                              : "sm:scale-95 opacity-75 hover:opacity-90"
                           }`}>
                           <div>
                             <div className='mx-auto relative h-36 w-36 overflow-hidden rounded-full border-4 border-emerald-400/50 bg-emerald-50/10 shadow-inner'>

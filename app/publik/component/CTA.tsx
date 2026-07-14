@@ -2,7 +2,7 @@ export default function CTA() {
   return (
     <section className='bg-white py-24 text-emerald-900'>
       <div className='mx-auto max-w-4xl px-4 text-center'>
-        <h2 className='mb-6 text-5xl font-bold'>
+        <h2 className='mb-6 text-3xl font-bold sm:text-4xl md:text-5xl'>
           Mari Bersama Mengembangkan Jam&apos;iyyah Nahdlatul Ulama
         </h2>
 
