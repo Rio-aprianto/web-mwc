@@ -126,12 +126,11 @@ export default async function AdminDashboardPage() {
     minimumFractionDigits: 0,
   }).format(totalNominalKoin);
 
-  // Menghindari overload error pada properti _count dengan tipe eksplisit
+  // PERBAIKAN 1: Menggunakan 'any' pada pencarian status kader
   const kaderAktifObj = kaderStatusRaw.find(
-    (item: { status: string; _count: { _all: number } }) =>
-      item.status === "Aktif",
+    (item: any) => item.status === "Aktif",
   );
-  const jumlahKaderAktif = kaderAktifObj?._count._all ?? 0;
+  const jumlahKaderAktif = kaderAktifObj?._count?._all ?? 0;
 
   const summaryCards = [
     {
@@ -160,14 +159,9 @@ export default async function AdminDashboardPage() {
     },
   ];
 
-  // Menggunakan tipe eksplisit pada map data Banom
+  // PERBAIKAN 2: Menggunakan 'any' pada map data Banom
   const banomMemberCountMap = new Map(
-    banomKaderRaw.map(
-      (item: { anggota: string; _count: { _all: number } }) => [
-        item.anggota,
-        item._count._all,
-      ],
-    ),
+    banomKaderRaw.map((item: any) => [item.anggota, item._count?._all ?? 0]),
   );
 
   const banomData: BanomDashboardItem[] = banomRaw.map(
@@ -180,14 +174,9 @@ export default async function AdminDashboardPage() {
     },
   );
 
-  // Menggunakan tipe eksplisit pada map data Ranting
+  // PERBAIKAN 3: Menggunakan 'any' pada map data Ranting
   const rantingKaderCountMap = new Map(
-    rantingKaderRaw.map(
-      (item: { ranting: string; _count: { _all: number } }) => [
-        item.ranting,
-        item._count._all,
-      ],
-    ),
+    rantingKaderRaw.map((item: any) => [item.ranting, item._count?._all ?? 0]),
   );
 
   const rantingStats: RantingDashboardItem[] = rantingRaw
@@ -204,15 +193,12 @@ export default async function AdminDashboardPage() {
     ...rantingStats.map((item) => item.kader),
   );
 
-  // Menggunakan tipe eksplisit pada reduce loop Gender
+  // PERBAIKAN 4: Menggunakan 'any' pada reduce loop Gender
   const genderCountMap = kaderGenderRaw.reduce(
-    (
-      accumulator: Record<"LakiLaki" | "Perempuan", number>,
-      item: { jenisKelamin: string; _count: { _all: number } },
-    ) => {
+    (accumulator: Record<"LakiLaki" | "Perempuan", number>, item: any) => {
       if (item.jenisKelamin) {
         accumulator[item.jenisKelamin as "LakiLaki" | "Perempuan"] =
-          item._count._all;
+          item._count?._all ?? 0;
       }
       return accumulator;
     },
@@ -282,126 +268,6 @@ export default async function AdminDashboardPage() {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-        </article>
-      </section>
-
-      <section className='grid gap-4 md:grid-cols-2'>
-        {/* Kolom Koin NU (Kiri) */}
-        <article className='rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm shadow-emerald-900/5 flex flex-col justify-between'>
-          <div>
-            <h2 className='text-lg font-semibold text-slate-900'>
-              Koin NU Per Bulan
-            </h2>
-            <p className='mt-1 text-sm text-slate-500'>
-              Total perolehan kotak infaq Koin NU pada bulan {namaBulanSekarang}
-              .
-            </p>
-            <div className='mt-8 mb-6 p-6 rounded-xl bg-emerald-50 border border-emerald-100 text-center'>
-              <p className='text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1'>
-                Perolehan Sekarang
-              </p>
-              <p className='text-4xl font-black text-slate-900'>
-                {koinNuBulanIniFormatted}
-              </p>
-            </div>
-          </div>
-
-          <div className='space-y-2 rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm text-slate-700'>
-            <div className='flex items-center justify-between'>
-              <span>Status Pengisian</span>
-              <span className='font-semibold text-emerald-700'>Aktif</span>
-            </div>
-            <div className='flex items-center justify-between'>
-              <span>Total Pengisian</span>
-              <span className='font-semibold text-slate-900'>
-                {totalIsiKoinNuTable} Kali
-              </span>
-            </div>
-          </div>
-        </article>
-
-        {/* Kolom Persentase Gender (Kanan) */}
-        <article className='rounded-2xl border border-emerald-800 bg-emerald-900 p-5 text-white shadow-sm flex flex-col justify-between'>
-          <div>
-            <h2 className='text-lg font-semibold'>Persentase Gender Anggota</h2>
-            <p className='mt-1 text-sm text-slate-300'>
-              Persentase kader laki-laki dan perempuan.
-            </p>
-
-            <div className='mt-6 mb-6 grid place-items-center'>
-              <div
-                className='relative h-44 w-44 rounded-full'
-                style={{
-                  background: `conic-gradient(#34d399 0 ${malePct}%, #bbf7d0 ${malePct}% 100%)`,
-                }}>
-                <div className='absolute inset-5 grid place-items-center rounded-full bg-emerald-950 text-center'>
-                  <p className='text-3xl font-bold'>{malePct}%</p>
-                  <p className='mt-1 text-xs text-emerald-300'>Laki-laki</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className='space-y-2 rounded-xl border border-white/10 bg-white/10 p-3 text-sm'>
-            <div className='flex items-center justify-between'>
-              <span>Laki-laki</span>
-              <span className='font-semibold'>
-                {genderCountMap.LakiLaki} ({malePct}%)
-              </span>
-            </div>
-            <div className='flex items-center justify-between'>
-              <span>Perempuan</span>
-              <span className='font-semibold'>
-                {genderCountMap.Perempuan} ({femalePct}%)
-              </span>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      <section>
-        <article className='rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm shadow-emerald-900/5'>
-          <h2 className='text-lg font-semibold text-slate-900'>
-            Statistik Kader Tiap Ranting
-          </h2>
-          <p className='mt-1 text-sm text-slate-500'>
-            Data jumlah kader tiap ranting berdasarkan database.
-          </p>
-
-          <div className='mt-3 overflow-x-auto rounded-xl border border-emerald-100 bg-emerald-50 p-4'>
-            <div className='min-w-200'>
-              <div
-                className='grid h-64 items-end gap-2'
-                style={{
-                  gridTemplateColumns: `repeat(${Math.max(rantingStats.length, 1)}, minmax(0, 1fr))`,
-                }}>
-                {rantingStats.length === 0 ? (
-                  <div className='col-span-full flex items-center justify-center text-sm text-slate-500'>
-                    Belum ada data ranting.
-                  </div>
-                ) : (
-                  rantingStats.map((item) => (
-                    <div
-                      key={item.id}
-                      className='flex flex-col items-center justify-end gap-2'>
-                      <div
-                        className='w-full rounded-md bg-emerald-500'
-                        style={{
-                          height: `${Math.max((item.kader / maxRantingKader) * 200, 20)}px`,
-                        }}
-                      />
-                      <span className='text-[11px] font-semibold text-slate-700'>
-                        {item.kader}
-                      </span>
-                      <span className='text-[10px] text-slate-500'>
-                        {item.name}
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
             </div>
           </div>
         </article>
