@@ -126,11 +126,11 @@ export default async function AdminDashboardPage() {
     minimumFractionDigits: 0,
   }).format(totalNominalKoin);
 
-  // PERBAIKAN 1: Menggunakan 'any' pada pencarian status kader
+  // FIX 1: Menggunakan as any untuk mem-bypass pengecekan objek _count Prisma
   const kaderAktifObj = kaderStatusRaw.find(
     (item: any) => item.status === "Aktif",
   );
-  const jumlahKaderAktif = kaderAktifObj?._count?._all ?? 0;
+  const jumlahKaderAktif = (kaderAktifObj?._count as any)?._all ?? 0;
 
   const summaryCards = [
     {
@@ -159,9 +159,12 @@ export default async function AdminDashboardPage() {
     },
   ];
 
-  // PERBAIKAN 2: Menggunakan 'any' pada map data Banom
+  // FIX 2: Menggunakan as any pada properti _count map Banom
   const banomMemberCountMap = new Map(
-    banomKaderRaw.map((item: any) => [item.anggota, item._count?._all ?? 0]),
+    banomKaderRaw.map((item: any) => [
+      item.anggota,
+      (item._count as any)?._all ?? 0,
+    ]),
   );
 
   const banomData: BanomDashboardItem[] = banomRaw.map(
@@ -174,9 +177,12 @@ export default async function AdminDashboardPage() {
     },
   );
 
-  // PERBAIKAN 3: Menggunakan 'any' pada map data Ranting
+  // FIX 3: Menggunakan as any pada properti _count map Ranting
   const rantingKaderCountMap = new Map(
-    rantingKaderRaw.map((item: any) => [item.ranting, item._count?._all ?? 0]),
+    rantingKaderRaw.map((item: any) => [
+      item.ranting,
+      (item._count as any)?._all ?? 0,
+    ]),
   );
 
   const rantingStats: RantingDashboardItem[] = rantingRaw
@@ -193,12 +199,12 @@ export default async function AdminDashboardPage() {
     ...rantingStats.map((item) => item.kader),
   );
 
-  // PERBAIKAN 4: Menggunakan 'any' pada reduce loop Gender
+  // FIX 4: Menggunakan as any pada properti _count reduce Loop Gender
   const genderCountMap = kaderGenderRaw.reduce(
     (accumulator: Record<"LakiLaki" | "Perempuan", number>, item: any) => {
       if (item.jenisKelamin) {
         accumulator[item.jenisKelamin as "LakiLaki" | "Perempuan"] =
-          item._count?._all ?? 0;
+          (item._count as any)?._all ?? 0;
       }
       return accumulator;
     },
