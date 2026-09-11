@@ -231,8 +231,8 @@ export default function AdminKoinNuPage() {
     try {
       const payload = {
         rantingId: Number(form.rantingId),
-        bulan: currentMonth,
-        tahun: currentYear,
+        bulan: Number(form.bulan),
+        tahun: Number(form.tahun),
         penanggungJawab: form.penanggungJawab.trim(),
         jumlahKoinBulanIni: parseRupiah(form.jumlahKoinBulanIni),
         jumlahKoinKeseluruhan: 0,
@@ -592,11 +592,17 @@ export default function AdminKoinNuPage() {
                   <label className='block text-sm font-medium mb-1'>
                     Bulan
                   </label>
-                  <input
-                    value={monthName(currentMonth)}
-                    readOnly
-                    className='w-full border border-emerald-200 rounded-lg px-3 py-2.5 bg-gray-100'
-                  />
+                  <select
+                    required
+                    value={form.bulan}
+                    onChange={(e) => onFormChange("bulan", e.target.value)}
+                    className='w-full border border-emerald-200 rounded-lg px-3 py-2.5'>
+                    {monthOptions.map((m) => (
+                      <option key={m.value} value={m.value}>
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -604,9 +610,11 @@ export default function AdminKoinNuPage() {
                     Tahun
                   </label>
                   <input
-                    value={currentYear}
-                    readOnly
-                    className='w-full border border-emerald-200 rounded-lg px-3 py-2.5 bg-gray-100'
+                    required
+                    type='number'
+                    value={form.tahun}
+                    onChange={(e) => onFormChange("tahun", e.target.value)}
+                    className='w-full border border-emerald-200 rounded-lg px-3 py-2.5'
                   />
                 </div>
 

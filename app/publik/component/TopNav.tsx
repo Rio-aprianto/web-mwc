@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -132,6 +133,13 @@ export default function TopNav() {
               </a>
             </li>
           ))}
+          <li>
+            <Link
+              href='/auth'
+              className='inline-flex rounded-full border border-white/25 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition hover:bg-white/10'>
+              Login Admin
+            </Link>
+          </li>
         </ul>
 
         {isMenuOpen && (
@@ -146,6 +154,13 @@ export default function TopNav() {
                 </a>
               </li>
             ))}
+            <li>
+              <Link
+                href='/auth'
+                className='block rounded-md px-3 py-2 text-center font-semibold transition hover:bg-white/10 hover:text-lime-300'>
+                Login Admin
+              </Link>
+            </li>
           </ul>
         )}
       </nav>
